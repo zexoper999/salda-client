@@ -1,28 +1,21 @@
-import { create } from "zustand";
-
-interface User {
-  id: number;
-  kakaoId: string;
-  name: string;
-  phone: string | null;
-  point: number;
-}
+import { create } from 'zustand';
+import type { User } from '@/types';
 
 interface AuthState {
   user: User | null;
   isLoggedIn: boolean;
-  login: (user: User) => void; // login func set user info
-  logout: () => void; // logout func reset user info
+  isLoading: boolean; // 앱 초기 인증 확인 중 여부
+  login: (user: User) => void;
+  logout: () => void;
+  setLoading: (loading: boolean) => void;
 }
 
-// 스토어 생성
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isLoggedIn: false,
+  isLoading: true,
 
-  // 로그인 성공 시 상태 업데이트
-  login: (user) => set({ user, isLoggedIn: true }),
-
-  // 로그아웃 시 상태 초기화
-  logout: () => set({ user: null, isLoggedIn: false }),
+  login: (user) => set({ user, isLoggedIn: true, isLoading: false }),
+  logout: () => set({ user: null, isLoggedIn: false, isLoading: false }),
+  setLoading: (loading) => set({ isLoading: loading }),
 }));
