@@ -1,26 +1,56 @@
+/* Pretendard 가변 폰트 (CDN) */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ─── 브랜드 컬러 토큰 ─────────────────────────────────────────
+   색상 변경 시 이 블록의 값만 수정하면 전체 적용됩니다.
+   ─────────────────────────────────────────────────────────── */
+@theme {
+  --color-primary:       #4590F9;
+  --color-primary-dark:  #2E72D8;
+  --color-primary-light: #EBF3FF;
+
+  --color-kakao:         #FEE500;
+  --color-kakao-text:    #000000;
+
+  --color-surface:       #F7F8FA;
+  --color-border:        #E5E7EB;
+
+  --color-text-primary:  #111827;
+  --color-text-secondary:#6B7280;
+  --color-text-disabled: #9CA3AF;
+
+  /* 폰트 */
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    system-ui, "Helvetica Neue", Arial, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* ─── 기본 스타일 ────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #ffffff;
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+}
+
+/* ─── 모바일 앱 컨테이너 ─────────────────────────────────────── */
+/* 모든 페이지는 최대 430px, 화면 중앙 정렬 */
+#app-container {
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  position: relative;
+  background: #ffffff;
+  overflow-x: hidden;
 }
