@@ -20,8 +20,12 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
   });
 
   useEffect(() => {
-    if (isSuccess && data?.data) {
-      login(data.data);
+    if (isSuccess) {
+      if (data?.data) {
+        login(data.data);
+      } else {
+        logout();
+      }
     } else if (isError) {
       logout();
     }
