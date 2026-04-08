@@ -3,19 +3,8 @@ import type { Subscription } from '@/types';
 
 interface SubscriptionCardProps {
   subscription: Subscription;
-  myTickets?: number;
-  userTotalTickets?: number;
-  compact?: boolean; // 홈 화면 가로 스크롤용
-}
-
-// 시간 경과율 계산 (REQ-003: 진행률 정의 확정 전 임시 사용)
-function getTimeProgress(startAt: string, endAt: string): number {
-  const start = new Date(startAt).getTime();
-  const end = new Date(endAt).getTime();
-  const now = Date.now();
-  if (now <= start) return 0;
-  if (now >= end) return 100;
-  return Math.round(((now - start) / (end - start)) * 100);
+  missionCount?: number; // 사용자 미션진행도 (0~9)
+  compact?: boolean;     // 홈 화면 가로 스크롤용
 }
 
 function progressColor(pct: number): string {
@@ -37,12 +26,11 @@ const STATUS_LABEL: Record<string, string> = {
 
 export default function SubscriptionCard({
   subscription: sub,
-  myTickets = 0,
-  userTotalTickets = 0,
+  missionCount = 0,
   compact = false,
 }: SubscriptionCardProps) {
-  const progress = getTimeProgress(sub.startAt, sub.endAt);
-  const hasEntered = myTickets > 0;
+  const progress = sub.entryProgress;
+  const hasProgress = sub.maxEntries > 0;
 
   if (compact) {
     return (
@@ -54,16 +42,14 @@ export default function SubscriptionCard({
             ) : (
               <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400" />
             )}
-            {/* 진행률 배지 */}
-            <div
-              className="absolute top-3 left-3 w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold shadow"
-              style={{ background: progressColor(progress) }}
-            >
-              {progress}%
-            </div>
-            <div className="absolute top-3 right-3 bg-black/60 text-white text-[10px] px-2 py-1 rounded-full">
-              마감까지 {progress}% 진행
-            </div>
+            {hasProgress && (
+              <div
+                className="absolute top-3 left-3 w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold shadow"
+                style={{ background: progressColor(progress) }}
+              >
+                {progress}%
+              </div>
+            )}
           </div>
           <div className="p-3">
             <span className="text-[10px] text-[var(--color-primary)] font-semibold">
@@ -76,14 +62,11 @@ export default function SubscriptionCard({
               <span
                 className="text-xs px-2 py-0.5 rounded-full font-medium"
                 style={{
-                  background: hasEntered ? 'var(--color-primary)' : 'var(--color-surface)',
-                  color: hasEntered ? 'white' : 'var(--color-text-secondary)',
+                  background: 'var(--color-surface)',
+                  color: 'var(--color-text-secondary)',
                 }}
               >
-                {hasEntered ? '설정중' : '설정하기'}
-              </span>
-              <span className="text-[10px] text-[var(--color-text-secondary)]">
-                {myTickets}/{userTotalTickets}
+                미션 {missionCount}/10
               </span>
             </div>
           </div>
@@ -101,15 +84,19 @@ export default function SubscriptionCard({
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400" />
         )}
-        <div
-          className="absolute top-3 left-3 w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold shadow"
-          style={{ background: progressColor(progress) }}
-        >
-          {progress}%
-        </div>
-        <div className="absolute top-3 right-3 bg-black/60 text-white text-[10px] px-2.5 py-1 rounded-full">
-          마감까지 {progress}% 진행되었습니다.
-        </div>
+        {hasProgress && (
+          <>
+            <div
+              className="absolute top-3 left-3 w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold shadow"
+              style={{ background: progressColor(progress) }}
+            >
+              {progress}%
+            </div>
+            <div className="absolute top-3 right-3 bg-black/60 text-white text-[10px] px-2.5 py-1 rounded-full">
+              목표까지 {progress}% 달성
+            </div>
+          </>
+        )}
       </div>
 
       {/* 카드 본문 */}
@@ -121,26 +108,20 @@ export default function SubscriptionCard({
           {sub.title}
         </h3>
 
-        {/* 참여율 행 */}
-        <div className="mt-2 flex items-center gap-2">
-          <span className="text-sm text-[var(--color-text-secondary)]">
-            내 참여율{' '}
-            <span className="font-semibold text-[var(--color-text-primary)]">
-              {/* 참여율은 상세 페이지에서만 표시, 목록에선 응모 여부만 */}
-              {hasEntered ? '응모 중' : '0.0000 %'}
-            </span>
-          </span>
-          {hasEntered && (
-            <span className="text-[11px] bg-[var(--color-primary-light)] text-[var(--color-primary)] font-semibold px-2 py-0.5 rounded-full">
-              {myTickets}회
-            </span>
-          )}
-        </div>
-
         {sub.oneLineDesc && (
-          <p className="mt-2 text-sm text-[var(--color-text-secondary)] line-clamp-2">
+          <p className="mt-1 text-sm text-[var(--color-text-secondary)] line-clamp-2">
             {sub.oneLineDesc}
           </p>
+        )}
+
+        {/* 응모 현황 */}
+        {hasProgress && (
+          <div className="mt-2 flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)]">
+            <span>응모현황</span>
+            <span className="font-semibold text-[var(--color-text-primary)]">
+              {sub.totalEntryCount.toLocaleString()} / {sub.maxEntries.toLocaleString()}
+            </span>
+          </div>
         )}
 
         <div className="mt-3 flex items-center justify-between">
@@ -161,14 +142,14 @@ export default function SubscriptionCard({
             href={`/subscriptions/${sub.id}`}
             className="flex-1 mr-3 h-10 rounded-full font-semibold text-sm flex items-center justify-center"
             style={{
-              background: hasEntered ? 'var(--color-primary)' : 'var(--color-surface)',
-              color: hasEntered ? 'white' : 'var(--color-text-secondary)',
+              background: 'var(--color-surface)',
+              color: 'var(--color-text-secondary)',
             }}
           >
-            {hasEntered ? '내 청약 설정중' : '내 청약 설정하기'}
+            내 청약 설정중
           </Link>
           <span className="text-sm font-semibold text-[var(--color-text-secondary)] whitespace-nowrap">
-            {myTickets}/{userTotalTickets}
+            {missionCount}/10
           </span>
         </div>
       </div>

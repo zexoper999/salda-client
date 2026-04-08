@@ -11,7 +11,8 @@ export default function HomePage() {
   const { data: subData } = useSubscriptions();
   const { data: productData } = useProducts();
 
-  const subscriptions = subData?.data?.slice(0, 5) ?? [];
+  const subscriptions = subData?.data?.subscriptions?.slice(0, 5) ?? [];
+  const missionCount = subData?.data?.missionCount ?? 0;
   const products = productData?.data?.slice(0, 4) ?? [];
 
   return (
@@ -62,8 +63,7 @@ export default function HomePage() {
               <SubscriptionCard
                 key={sub.id}
                 subscription={sub}
-                myTickets={0}
-                userTotalTickets={user?.ticket ?? 0}
+                missionCount={missionCount}
                 compact
               />
             ))}

@@ -22,7 +22,8 @@ export default function SubscriptionsPage() {
   const { data, isLoading } = useSubscriptions(
     activeTab === 'ALL' ? undefined : activeTab,
   );
-  const subscriptions = data?.data ?? [];
+  const subscriptions = data?.data?.subscriptions ?? [];
+  const missionCount = data?.data?.missionCount ?? 0;
 
   return (
     <div className="min-h-dvh bg-white">
@@ -78,8 +79,7 @@ export default function SubscriptionsPage() {
               <SubscriptionCard
                 key={sub.id}
                 subscription={sub}
-                myTickets={0}
-                userTotalTickets={user?.ticket ?? 0}
+                missionCount={missionCount}
               />
             ))}
         {!isLoading && subscriptions.length === 0 && (
