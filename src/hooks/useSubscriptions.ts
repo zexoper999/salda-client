@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/axios';
-import type { ApiResponse, Subscription, SubscriptionDetail, SubscriptionEntry, SubscriptionType } from '@/types';
+import type { ApiResponse, SubscriptionListResponse, SubscriptionDetail, SubscriptionEntry, SubscriptionType } from '@/types';
 
 export function useSubscriptions(type?: SubscriptionType) {
-  return useQuery<ApiResponse<Subscription[]>>({
+  return useQuery<ApiResponse<SubscriptionListResponse>>({
     queryKey: ['subscriptions', type],
     queryFn: async () => {
       const res = await api.get('/subscriptions', { params: type ? { type } : {} });
