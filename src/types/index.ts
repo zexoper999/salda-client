@@ -96,12 +96,34 @@ export type ProductCategory =
   | 'GAS'
   | 'DINING';
 
+export type ProductStatus = 'ON_SALE' | 'SUSPENDED' | 'ENDED';
+
 export interface Product {
   id: number;
   category: ProductCategory;
+  status: ProductStatus;
   name: string;
   description?: string;
   imageUrl?: string;
   price: number;
-  stock?: number;
+  stock?: number | null;
+  startAt?: string | null;
+  endAt?: string | null;
+  purchaseCount: number;
+  isSoldOut: boolean;
+}
+
+export interface ProductListResponse {
+  total: number;
+  products: Product[];
+}
+
+export interface Purchase {
+  id: number;
+  phone: string;
+  pointBefore: number;
+  pointUsed: number;
+  pointAfter: number;
+  createdAt: string;
+  product: Pick<Product, 'id' | 'category' | 'name' | 'imageUrl' | 'price'>;
 }
