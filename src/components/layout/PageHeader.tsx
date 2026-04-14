@@ -5,17 +5,18 @@ import { useRouter } from 'next/navigation';
 interface PageHeaderProps {
   title?: string;
   showBack?: boolean;
+  onBack?: () => void;
   rightSlot?: React.ReactNode;
 }
 
-export default function PageHeader({ title, showBack = true, rightSlot }: PageHeaderProps) {
+export default function PageHeader({ title, showBack = true, onBack, rightSlot }: PageHeaderProps) {
   const router = useRouter();
 
   return (
     <header className="sticky top-0 z-40 flex items-center h-14 px-4 bg-white border-b border-[var(--color-border)]">
       {showBack && (
         <button
-          onClick={() => router.back()}
+          onClick={() => (onBack ? onBack() : router.back())}
           className="flex items-center justify-center w-9 h-9 -ml-1 mr-2"
           aria-label="뒤로가기"
         >

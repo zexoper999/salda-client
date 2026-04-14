@@ -1,9 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/axios';
-import type { ApiResponse, Product, ProductCategory } from '@/types';
+import type { ApiResponse, Product, ProductListResponse, ProductCategory, Purchase } from '@/types';
 
 export function useProducts(category?: ProductCategory) {
-  return useQuery<ApiResponse<Product[]>>({
+  return useQuery<ApiResponse<ProductListResponse>>({
     queryKey: ['products', category],
     queryFn: async () => {
       const res = await api.get('/products', { params: category ? { category } : {} });
@@ -19,6 +19,17 @@ export function useProductDetail(id: number) {
       const res = await api.get(`/products/${id}`);
       return res.data;
     },
+    enabled: !isNaN(id),
+  });
+}
+
+export function useMyPurchases() {
+  return useQuery<ApiResponse<Purchase[]>>({
+    queryKey: ['my-purchases'],
+    queryFn: async () => {
+      const res = await api.get('/products/my/purchases');
+      return res.data;
+    },
   });
 }
 
@@ -30,7 +41,8 @@ export function usePurchaseProduct(productId: number) {
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['auth-me'] }); // 포인트 잔액 갱신
+      void queryClient.invalidateQueries({ queryKey: ['auth-me'] });
+      void queryClient.invalidateQueries({ queryKey: ['my-purchases'] });
     },
   });
 }
