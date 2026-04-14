@@ -13,7 +13,7 @@ export default function HomePage() {
 
   const subscriptions = subData?.data?.subscriptions?.slice(0, 5) ?? [];
   const missionCount = subData?.data?.missionCount ?? 0;
-  const products = productData?.data?.slice(0, 4) ?? [];
+  const products = productData?.data?.products?.slice(0, 4) ?? [];
 
   return (
     <div className="min-h-dvh bg-white">
