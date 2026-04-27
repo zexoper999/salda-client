@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import './globals.css';
 import QueryProvider from '@/providers/QueryProvider';
 import AuthProvider from '@/providers/AuthProvider';
+import Toast from '@/components/ui/Toast';
 
 export const metadata: Metadata = {
   title: 'SALDA 살다',
@@ -21,7 +22,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <QueryProvider>
           <AuthProvider>
-            <div id="app-container">{children}</div>
+            <div id="app-container">
+              {children}
+              <Toast />
+            </div>
           </AuthProvider>
         </QueryProvider>
       </body>
