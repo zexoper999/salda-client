@@ -1,8 +1,11 @@
 'use client';
 
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import PageHeader from '@/components/layout/PageHeader';
+import MissionResultSheet from '@/components/ui/MissionResultSheet';
 import { useMissionDetail, useCompleteMission } from '@/hooks/useMissions';
+import { useToastStore } from '@/store/useToastStore';
 
 const CATEGORY_LABEL: Record<string, string> = {
   SNS_SUBSCRIBE: 'SNS 구독',
@@ -16,6 +19,13 @@ export default function MissionDetailPage() {
 
   const { data, isLoading } = useMissionDetail(missionId);
   const completeMutation = useCompleteMission(missionId);
+  const { show } = useToastStore();
+
+  const [resultSheet, setResultSheet] = useState<{
+    pointEarned: number;
+    ticketEarned: number;
+    bonusTicket: number;
+  } | null>(null);
 
   const mission = data?.data;
 
@@ -39,13 +49,14 @@ export default function MissionDetailPage() {
     try {
       const res = await completeMutation.mutateAsync();
       const d = res.data;
-      const bonus = d.bonusTicket > 0 ? `\n🎉 보너스 응모권 ${d.bonusTicket}장 추가!` : '';
-      alert(
-        `미션 완료!\n포인트 +${d.pointEarned}P, 응모권 +${d.ticketEarned}장${bonus}`,
-      );
+      setResultSheet({
+        pointEarned: d.pointEarned,
+        ticketEarned: d.ticketEarned,
+        bonusTicket: d.bonusTicket,
+      });
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      alert(msg ?? '미션 처리 중 오류가 발생했습니다.');
+      show('error', msg ?? '미션 처리 중 오류가 발생했습니다.');
     }
   };
 
@@ -62,7 +73,7 @@ export default function MissionDetailPage() {
         )}
       </div>
 
-      <div className="p-5 space-y-5">
+      <div className="p-5 space-y-5 pb-20">
         {/* 카테고리 + 제목 */}
         <div>
           <div className="flex items-center gap-2 mb-1 flex-wrap">
@@ -118,7 +129,7 @@ export default function MissionDetailPage() {
         )}
 
         {/* 기간 */}
-        {(mission as unknown as { startAt?: string; endAt?: string }).endAt && (
+        {(mission as unknown as { endAt?: string }).endAt && (
           <div className="text-xs text-[var(--color-text-secondary)] border-t border-[var(--color-border)] pt-3">
             미션 기간:{' '}
             {(mission as unknown as { startAt?: string }).startAt &&
@@ -139,12 +150,19 @@ export default function MissionDetailPage() {
           {completeMutation.isPending
             ? '처리 중...'
             : mission.completedToday
-            ? '오늘 이미 완료한 미션입니다'
-            : isClosed
-            ? '종료된 미션입니다'
-            : '미션 수행하기'}
+              ? '오늘 이미 완료한 미션입니다'
+              : isClosed
+                ? '종료된 미션입니다'
+                : '미션 수행하기'}
         </button>
       </div>
+
+      {/* 미션 결과 바텀시트 */}
+      <MissionResultSheet
+        isOpen={resultSheet !== null}
+        onClose={() => setResultSheet(null)}
+        result={resultSheet}
+      />
     </div>
   );
 }
