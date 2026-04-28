@@ -1,15 +1,24 @@
 'use client';
 
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { useProducts } from '@/hooks/useShop';
 import SubscriptionCard from '@/components/subscription/SubscriptionCard';
+import { api } from '@/lib/axios';
+import type { Banner } from '@/hooks/useAdminBanners';
 
 export default function HomePage() {
   const { user } = useAuthStore();
   const { data: subData } = useSubscriptions();
   const { data: productData } = useProducts();
+  const { data: bannerData } = useQuery<{ data: Banner[] }>({
+    queryKey: ['banners-active'],
+    queryFn: async () => { const r = await api.get('/banners'); return r.data; },
+    staleTime: 1000 * 60 * 5,
+  });
+  const activeBanner = bannerData?.data?.[0];
 
   const subscriptions = subData?.data?.subscriptions?.slice(0, 5) ?? [];
   const missionCount = subData?.data?.missionCount ?? 0;
@@ -32,15 +41,23 @@ export default function HomePage() {
         </button>
       </header>
 
-      {/* 광고주 배너 (REQ-004) */}
-      <div
-        className="mx-4 mt-4 rounded-2xl overflow-hidden h-[120px] flex items-end p-4"
-        style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)' }}
-      >
-        <div>
-          <p className="text-white/70 text-xs mb-1">파트너십 문의</p>
-          <p className="text-white text-xl font-bold">광고주를 모집합니다.</p>
-        </div>
+      {/* 광고주 배너 — 어드민에서 등록한 활성 배너 표시 */}
+      <div className="mx-4 mt-4 rounded-2xl overflow-hidden h-[120px]">
+        {activeBanner?.imageUrl ? (
+          <img src={activeBanner.imageUrl} alt={activeBanner.title} className="w-full h-full object-cover" />
+        ) : (
+          <div
+            className="w-full h-full flex items-end p-4"
+            style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)' }}
+          >
+            <div>
+              <p className="text-white/70 text-xs mb-1">파트너십 문의</p>
+              <p className="text-white text-xl font-bold">
+                {activeBanner?.title ?? '광고주를 모집합니다.'}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* 청약 응모하기 섹션 */}
