@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCreateBanner } from '@/hooks/useAdminBanners';
 
 export default function AdminContentsNewPage() {
   const router = useRouter();
   const createMutation = useCreateBanner();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState({
     imageUrl: '',
@@ -17,8 +18,19 @@ export default function AdminContentsNewPage() {
   });
   const [error, setError] = useState('');
 
-  const set = (key: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setForm((f) => ({ ...f, [key]: e.target.value }));
+  const set = (key: keyof typeof form) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setForm((f) => ({ ...f, [key]: e.target.value }));
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      setForm((f) => ({ ...f, imageUrl: ev.target?.result as string }));
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleSubmit = async () => {
     if (!form.title.trim()) { setError('제목을 입력하세요.'); return; }
@@ -43,25 +55,49 @@ export default function AdminContentsNewPage() {
       <h1 className="text-2xl font-bold text-gray-800 mb-8">컨텐츠 등록</h1>
 
       <div className="bg-white rounded-xl border border-gray-200 p-8 space-y-6">
-        {/* 사진 URL */}
+
+        {/* 사진등록 */}
         <div>
           <label className="block text-sm font-semibold text-gray-700 mb-2">사진등록</label>
-          {form.imageUrl && (
-            <div className="w-40 h-28 mb-3 rounded-lg overflow-hidden border border-gray-200">
-              <img src={form.imageUrl} alt="preview" className="w-full h-full object-cover" />
-            </div>
-          )}
-          {!form.imageUrl && (
-            <div className="w-40 h-28 mb-3 rounded-lg border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 cursor-pointer hover:border-gray-300 transition-colors">
-              <span className="text-2xl mb-1">+</span>
-              <span className="text-xs">사진추가하기</span>
-            </div>
-          )}
+
+          {/* 숨긴 파일 입력 */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+
+          {/* 클릭 가능한 미리보기 영역 */}
+          <div
+            onClick={() => fileInputRef.current?.click()}
+            className="w-40 h-28 mb-3 rounded-lg overflow-hidden border-2 border-dashed border-gray-200
+              flex flex-col items-center justify-center cursor-pointer
+              hover:border-gray-400 hover:bg-gray-50 transition-colors group relative"
+          >
+            {form.imageUrl ? (
+              <>
+                <img src={form.imageUrl} alt="preview" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <span className="text-white text-xs font-medium">변경</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <span className="text-2xl text-gray-300 mb-1 group-hover:text-gray-400 transition-colors">+</span>
+                <span className="text-xs text-gray-400 group-hover:text-gray-500 transition-colors">사진추가하기</span>
+              </>
+            )}
+          </div>
+
+          {/* URL 직접 입력 (선택) */}
+          <p className="text-xs text-gray-400 mb-1.5">또는 이미지 URL 직접 입력</p>
           <input
             type="url"
-            value={form.imageUrl}
+            value={form.imageUrl.startsWith('data:') ? '' : form.imageUrl}
             onChange={set('imageUrl')}
-            placeholder="이미지 URL을 입력하세요"
+            placeholder="https://example.com/image.jpg"
             className="w-full h-10 px-3 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-gray-400"
           />
         </div>
