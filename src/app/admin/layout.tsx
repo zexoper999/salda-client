@@ -7,13 +7,21 @@ import { api } from '@/lib/axios';
 import { useAdminStore } from '@/store/useAdminStore';
 import AdminSidebar from '@/components/admin/AdminSidebar';
 
+function AdminSpinner() {
+  return (
+    <div className="fixed inset-0 bg-[#1C2536] z-[1000] flex items-center justify-center">
+      <div className="w-8 h-8 border-2 border-white/20 border-t-white rounded-full animate-spin" />
+    </div>
+  );
+}
+
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const { login, logout } = useAdminStore();
   const isLoginPage = pathname === '/admin/login';
 
-  const { data, isError, isSuccess } = useQuery({
+  const { data, isError, isSuccess, isPending } = useQuery({
     queryKey: ['admin-me'],
     queryFn: async () => {
       const res = await api.get('/admin/auth/me');
@@ -39,12 +47,23 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     router.replace('/admin/login');
   };
 
+  // 로그인 페이지는 별도 레이아웃
   if (isLoginPage) {
     return (
-      <div className="fixed inset-0 bg-white z-[1000]">
+      <div className="fixed inset-0 z-[1000]">
         {children}
       </div>
     );
+  }
+
+  // auth 체크 중 — 빈 화면 대신 스피너 표시 (FOUC 방지)
+  if (isPending || (!isSuccess && !isError)) {
+    return <AdminSpinner />;
+  }
+
+  // 인증 실패 — useEffect에서 redirect 처리 중, 스피너 유지
+  if (isError) {
+    return <AdminSpinner />;
   }
 
   return (
@@ -71,7 +90,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </button>
         </header>
 
-        {/* 컨텐츠 */}
         <main className="flex-1 overflow-y-auto p-8">
           {children}
         </main>
