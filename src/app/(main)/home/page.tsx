@@ -16,7 +16,7 @@ export default function HomePage() {
   const { data: bannerData } = useQuery<{ data: Banner[] }>({
     queryKey: ['banners-active'],
     queryFn: async () => { const r = await api.get('/banners'); return r.data; },
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60,
   });
   const activeBanner = bannerData?.data?.[0];
 
