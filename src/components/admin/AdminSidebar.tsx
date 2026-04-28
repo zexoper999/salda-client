@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 
 const NAV = [
   { label: '컨텐츠관리', href: '/admin/contents' },
-  { label: '회원관리',   href: '/admin/members' },
+  { label: '회원관리',   href: '/admin/users' },
   { label: '청약관리',   href: '/admin/subscriptions' },
   { label: '쇼핑관리',   href: '/admin/shop' },
   { label: '미션관리',   href: '/admin/missions' },
