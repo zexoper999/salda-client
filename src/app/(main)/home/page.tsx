@@ -26,36 +26,47 @@ export default function HomePage() {
 
   return (
     <div className="min-h-dvh bg-white">
-      {/* 헤더 */}
-      <header className="flex items-center justify-between px-5 h-14 bg-white border-b border-[var(--color-border)]">
-        <p className="text-base font-bold tracking-widest text-[var(--color-text-primary)]">
-          SALDA <span className="text-xs font-medium text-[var(--color-text-secondary)]">살다</span>
-        </p>
-        <button aria-label="알림">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.37 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.64 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16Z"
-              fill="#6B7280"
-            />
-          </svg>
-        </button>
-      </header>
-
-      {/* 광고주 배너 — 어드민에서 등록한 활성 배너 표시 */}
-      <div className="mx-4 mt-4 rounded-2xl overflow-hidden h-[120px]">
+      {/* 배너 — 상단 full-width, 헤더 오버레이 */}
+      <div className="relative w-full h-[200px] overflow-hidden">
         {activeBanner?.imageUrl ? (
           <img src={activeBanner.imageUrl} alt={activeBanner.title} className="w-full h-full object-cover" />
         ) : (
           <div
-            className="w-full h-full flex items-end p-4"
-            style={{ background: 'linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)' }}
+            className="w-full h-full"
+            style={{ background: 'linear-gradient(160deg, #1a2a5e 0%, #4590F9 60%, #b07b3e 100%)' }}
+          />
+        )}
+        {/* 헤더 오버레이 */}
+        <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-5 h-14">
+          <div className="w-6" />
+          <p
+            className="text-white tracking-[0.18em] font-black text-base"
+            style={{ fontFamily: "'Lato', sans-serif" }}
           >
-            <div>
-              <p className="text-white/70 text-xs mb-1">파트너십 문의</p>
-              <p className="text-white text-xl font-bold">
-                {activeBanner?.title ?? '광고주를 모집합니다.'}
-              </p>
-            </div>
+            S A L D A{' '}
+            <span
+              className="text-xs font-medium tracking-normal"
+              style={{ fontFamily: 'var(--font-sans)', letterSpacing: '0.04em' }}
+            >
+              살다
+            </span>
+          </p>
+          <button aria-label="알림">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path
+                d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.37 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.64 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16Z"
+                fill="white"
+              />
+            </svg>
+          </button>
+        </div>
+        {/* 배너 텍스트 (이미지 없을 때) */}
+        {!activeBanner?.imageUrl && (
+          <div className="absolute bottom-5 left-5">
+            <p className="text-white/70 text-xs mb-1">파트너십 문의</p>
+            <p className="text-white text-xl font-bold">
+              {activeBanner?.title ?? '광고주를 모집합니다.'}
+            </p>
           </div>
         )}
       </div>

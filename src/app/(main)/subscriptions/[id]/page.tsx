@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useParams } from 'next/navigation';
-import PageHeader from '@/components/layout/PageHeader';
+import { useState, useRef } from 'react';
+import { useParams, useRouter } from 'next/navigation';
 import BottomSheet from '@/components/ui/BottomSheet';
 import { useSubscriptionDetail, useSubscriptions, useEnterSubscription } from '@/hooks/useSubscriptions';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -11,6 +10,7 @@ import { useToastStore } from '@/store/useToastStore';
 export default function SubscriptionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const subscriptionId = Number(id);
+  const router = useRouter();
   const { user } = useAuthStore();
   const { show } = useToastStore();
 
@@ -20,7 +20,8 @@ export default function SubscriptionDetailPage() {
 
   const [ticketInput, setTicketInput] = useState(1);
   const [showEntrySheet, setShowEntrySheet] = useState(false);
-  const [showProgressBadge, setShowProgressBadge] = useState(true);
+  const [currentImage, setCurrentImage] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const sub = data?.data;
   const missionCount = listData?.data?.missionCount ?? 0;
@@ -28,9 +29,8 @@ export default function SubscriptionDetailPage() {
   if (isLoading || !sub) {
     return (
       <div className="min-h-dvh bg-white">
-        <PageHeader title="청약 상세" />
+        <div className="h-[320px] bg-[var(--color-surface)] animate-pulse" />
         <div className="p-5 space-y-4">
-          <div className="h-[220px] bg-[var(--color-surface)] rounded-2xl animate-pulse" />
           <div className="h-6 bg-[var(--color-surface)] rounded animate-pulse w-3/4" />
           <div className="h-4 bg-[var(--color-surface)] rounded animate-pulse w-1/2" />
         </div>
@@ -39,7 +39,13 @@ export default function SubscriptionDetailPage() {
   }
 
   const isClosed = sub.status === 'CLOSED';
-  const hasProgress = sub.maxEntries > 0 && sub.entryProgress > 0;
+  const images = sub.imageUrls?.length ? sub.imageUrls : [];
+
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    const idx = Math.round(scrollRef.current.scrollLeft / scrollRef.current.clientWidth);
+    setCurrentImage(idx);
+  };
 
   const handleEnter = async () => {
     if (ticketInput < 1 || ticketInput > (user?.ticket ?? 0)) return;
@@ -55,48 +61,62 @@ export default function SubscriptionDetailPage() {
 
   return (
     <div className="min-h-dvh bg-white">
-      <PageHeader title="청약 상세" />
-
-      {/* 이미지 */}
-      <div className="relative h-[220px] bg-gray-200">
-        {sub.imageUrl ? (
-          <img src={sub.imageUrl} alt={sub.title} className="w-full h-full object-cover" />
+      {/* 이미지 캐러셀 — 상단 fullbleed */}
+      <div className="relative h-[320px] bg-gray-200 overflow-hidden">
+        {images.length > 0 ? (
+          <div
+            ref={scrollRef}
+            className="flex h-full overflow-x-auto snap-x snap-mandatory scrollbar-hide"
+            onScroll={handleScroll}
+            style={{ scrollSnapType: 'x mandatory' }}
+          >
+            {images.map((url, i) => (
+              <div key={i} className="snap-start shrink-0 w-full h-full">
+                <img src={url} alt={`${sub.title} ${i + 1}`} className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div>
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400" />
         )}
-        <div className="absolute inset-0 bg-black/20" />
 
-        {/* 청약 타입 뱃지 */}
-        <div className="absolute bottom-4 left-4">
-          <span className="bg-white/90 text-[var(--color-primary)] text-xs font-bold px-2.5 py-1 rounded-full">
-            {sub.type === 'JEONSE' ? '전세청약' : '차량청약'}
-          </span>
-        </div>
+        {/* 뒤로가기 버튼 */}
+        <button
+          onClick={() => router.back()}
+          className="absolute top-12 left-4 w-9 h-9 rounded-full bg-black/40 flex items-center justify-center"
+          aria-label="뒤로가기"
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M11 4L6 9L11 14" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
 
-        {/* 진행률 배지 */}
-        {hasProgress && showProgressBadge && (
-          <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-black/55 rounded-full pl-3 pr-1.5 py-1.5">
-            <span className="text-xs font-semibold text-white">
-              마감까지 {Math.round(sub.entryProgress)}% 진행되었습니다.
-            </span>
-            <button
-              onClick={() => setShowProgressBadge(false)}
-              className="w-5 h-5 flex items-center justify-center bg-white/20 rounded-full"
-              aria-label="닫기"
-            >
-              <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                <path d="M2 2L8 8M8 2L2 8" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-            </button>
+        {/* 이미지 dot indicator */}
+        {images.length > 1 && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+            {images.map((_, i) => (
+              <div
+                key={i}
+                className="rounded-full transition-all duration-200"
+                style={{
+                  width: i === currentImage ? 16 : 6,
+                  height: 6,
+                  background: i === currentImage ? 'white' : 'rgba(255,255,255,0.5)',
+                }}
+              />
+            ))}
           </div>
         )}
       </div>
 
       {/* 컨텐츠 */}
-      <div className="p-5 space-y-5 pb-24">
-        {/* 제목 + 상태 */}
+      <div className="p-5 space-y-5 pb-28">
+        {/* 타입 + 제목 */}
         <div>
           <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="text-xs text-[var(--color-primary)] font-semibold">
+              {sub.type === 'JEONSE' ? '전세청약' : '차량청약'}
+            </span>
             <StatusBadge status={sub.status} />
             {sub.bonusIncluded && (
               <span className="text-[11px] bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">
@@ -110,7 +130,7 @@ export default function SubscriptionDetailPage() {
           )}
         </div>
 
-        {/* 내 점유율 */}
+        {/* 내 참여 점유율 */}
         <div className="bg-[var(--color-primary-light)] rounded-2xl p-4 space-y-3">
           <div className="flex items-center justify-between">
             <span className="text-sm font-semibold text-[var(--color-primary)]">내 참여 점유율</span>
@@ -130,28 +150,34 @@ export default function SubscriptionDetailPage() {
           </div>
         </div>
 
+        {/* 응모 횟수 안내 */}
+        {sub.myEntryCount > 0 && (
+          <p className="text-sm text-[var(--color-text-secondary)]">
+            지금까지 이 청약을{' '}
+            <strong className="text-[var(--color-primary)]">{sub.myEntryCount}회</strong>{' '}
+            응모하셨어요.
+          </p>
+        )}
+
         {/* 청약 정보 */}
         <div className="space-y-2">
           <InfoRow label="보증금" value={`${sub.deposit.toLocaleString()}원`} />
           <InfoRow label="응모 기간" value={`${fmtDate(sub.startAt)} ~ ${fmtDate(sub.endAt)}`} />
         </div>
 
-        {/* 상세 설명 (최대 5줄 표시 후 스크롤) */}
         {sub.description && (
           <div>
             <h2 className="text-sm font-semibold text-[var(--color-text-primary)] mb-2">상세 설명</h2>
-            <div className="max-h-[7.5rem] overflow-y-auto">
-              <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-line">
-                {sub.description}
-              </p>
-            </div>
+            <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed whitespace-pre-line">
+              {sub.description}
+            </p>
           </div>
         )}
       </div>
 
-      {/* 56px 플로팅 pill 버튼 */}
+      {/* 플로팅 응모 버튼 */}
       {!isClosed && (
-        <div className="fixed bottom-[68px] left-1/2 -translate-x-1/2 w-[calc(100%-40px)] max-w-[390px] z-40">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-40px)] max-w-[390px] z-40">
           <button
             onClick={() => setShowEntrySheet(true)}
             className="w-full h-14 rounded-full flex items-center px-5 gap-3 shadow-lg"
@@ -166,11 +192,7 @@ export default function SubscriptionDetailPage() {
       )}
 
       {/* 응모 바텀시트 */}
-      <BottomSheet
-        isOpen={showEntrySheet}
-        onClose={() => setShowEntrySheet(false)}
-        title="응모권 사용"
-      >
+      <BottomSheet isOpen={showEntrySheet} onClose={() => setShowEntrySheet(false)} title="응모권 사용">
         <div className="space-y-5">
           <p className="text-sm text-[var(--color-text-secondary)]">
             보유 응모권: <strong className="text-[var(--color-text-primary)]">{user?.ticket ?? 0}장</strong>
