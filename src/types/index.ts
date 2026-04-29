@@ -26,11 +26,12 @@ export interface Subscription {
   title: string;
   oneLineDesc?: string;
   description?: string;
-  imageUrl?: string;
+  imageUrls?: string[];        // R2 업로드 이미지 배열 (첫 번째를 썸네일로 사용)
   deposit: number;
   maxEntries: number;         // 목표 응모수 (0이면 미설정)
   totalEntryCount: number;    // 현재 전체 응모 건수
   entryProgress: number;      // 응모달성률 = totalEntryCount / maxEntries * 100
+  myEntryCount?: number;      // 내 응모 횟수
   bonusIncluded: boolean;
   startAt: string;
   endAt: string;
@@ -46,6 +47,7 @@ export interface SubscriptionDetail extends Subscription {
   totalTickets: number;
   myTickets: number;
   myEntryRate: number;        // 내 참여율 = myTickets / totalTickets * 100
+  myEntryCount: number;       // 내 응모 횟수
 }
 
 export interface SubscriptionEntry {
