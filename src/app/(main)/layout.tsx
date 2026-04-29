@@ -1,12 +1,15 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import BottomTabBar from '@/components/layout/BottomTabBar';
 
+const TOP_LEVEL_PATHS = new Set(['/home', '/subscriptions', '/shop', '/missions', '/my']);
+
 export default function MainLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { isLoggedIn, isLoading } = useAuthStore();
 
   useEffect(() => {
@@ -23,8 +26,10 @@ export default function MainLayout({ children }: { children: React.ReactNode }) 
     );
   }
 
+  const isTopLevel = TOP_LEVEL_PATHS.has(pathname);
+
   return (
-    <div className="pb-[60px]">
+    <div className={isTopLevel ? 'pb-[60px]' : ''}>
       {children}
       <BottomTabBar />
     </div>
