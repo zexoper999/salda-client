@@ -3,14 +3,8 @@ import type { Subscription } from '@/types';
 
 interface SubscriptionCardProps {
   subscription: Subscription;
-  missionCount?: number; // 사용자 미션진행도 (0~9)
-  compact?: boolean;     // 홈 화면 가로 스크롤용
-}
-
-function progressColor(pct: number): string {
-  if (pct < 40) return '#22C55E';
-  if (pct < 70) return '#F59E0B';
-  return '#EF4444';
+  missionCount?: number;
+  compact?: boolean;
 }
 
 const TYPE_LABEL: Record<string, string> = {
@@ -24,50 +18,105 @@ const STATUS_LABEL: Record<string, string> = {
   CLOSED: '응모마감',
 };
 
+function ProgressCircle({ pct }: { pct: number }) {
+  const r = 18;
+  const circ = 2 * Math.PI * r;
+  const offset = circ * (1 - Math.min(pct, 100) / 100);
+  return (
+    <svg width="44" height="44" viewBox="0 0 44 44">
+      <circle cx="22" cy="22" r={r} fill="rgba(0,0,0,0.35)" stroke="rgba(255,255,255,0.2)" strokeWidth="3" />
+      <circle
+        cx="22" cy="22" r={r}
+        fill="none"
+        stroke="white"
+        strokeWidth="3"
+        strokeDasharray={circ}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
+        transform="rotate(-90 22 22)"
+      />
+      <text x="22" y="26" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold">
+        {pct}%
+      </text>
+    </svg>
+  );
+}
+
 export default function SubscriptionCard({
   subscription: sub,
   missionCount = 0,
   compact = false,
 }: SubscriptionCardProps) {
+  const imageUrl = sub.imageUrls?.[0];
   const progress = sub.entryProgress;
   const hasProgress = sub.maxEntries > 0;
 
   if (compact) {
     return (
-      <Link href={`/subscriptions/${sub.id}`} className="block w-[280px] flex-shrink-0">
-        <div className="rounded-2xl overflow-hidden shadow-sm border border-[var(--color-border)] bg-white">
-          <div className="relative h-[160px] bg-gray-200">
-            {sub.imageUrl ? (
-              <img src={sub.imageUrl} alt={sub.title} className="w-full h-full object-cover" />
+      <Link href={`/subscriptions/${sub.id}`} className="block w-[300px] flex-shrink-0">
+        <div className="rounded-3xl overflow-hidden shadow-md bg-white">
+          {/* 이미지 영역 */}
+          <div className="relative h-[170px] bg-gray-200">
+            {imageUrl ? (
+              <img src={imageUrl} alt={sub.title} className="w-full h-full object-cover" />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400" />
+              <div className="w-full h-full bg-gradient-to-br from-blue-300 to-blue-500" />
             )}
             {hasProgress && (
-              <div
-                className="absolute top-3 left-3 w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold shadow"
-                style={{ background: progressColor(progress) }}
-              >
-                {progress}%
-              </div>
+              <>
+                <div className="absolute top-3 left-3">
+                  <ProgressCircle pct={Math.round(progress)} />
+                </div>
+                <div className="absolute top-3 right-3 bg-black/55 text-white text-[10px] font-medium px-2.5 py-1 rounded-full">
+                  마감까지 {Math.round(progress)}% 진행되었습니다.
+                </div>
+              </>
             )}
           </div>
-          <div className="p-3">
-            <span className="text-[10px] text-[var(--color-primary)] font-semibold">
+
+          {/* 컨텐츠 */}
+          <div className="px-4 pt-3 pb-2">
+            <span className="text-[11px] text-[var(--color-primary)] font-semibold">
               {TYPE_LABEL[sub.type]}
             </span>
-            <p className="text-sm font-bold text-[var(--color-text-primary)] mt-0.5 line-clamp-2">
+            <h3 className="mt-0.5 text-sm font-bold text-[var(--color-text-primary)] leading-snug line-clamp-2">
               {sub.title}
-            </p>
-            <div className="mt-2 flex items-center justify-between">
-              <span
-                className="text-xs px-2 py-0.5 rounded-full font-medium"
-                style={{
-                  background: 'var(--color-surface)',
-                  color: 'var(--color-text-secondary)',
-                }}
-              >
-                미션 {missionCount}/10
+            </h3>
+
+            <div className="mt-1.5 flex items-center gap-2">
+              <span className="text-xs text-[var(--color-text-secondary)]">내 참여율</span>
+              <span className="text-xs font-semibold text-[var(--color-text-primary)]">
+                {(sub as { myEntryRate?: number }).myEntryRate?.toFixed(4) ?? '0.0000'}%
               </span>
+              {(sub.myEntryCount ?? 0) > 0 && (
+                <span
+                  className="text-[10px] font-bold text-white px-1.5 py-0.5 rounded-full"
+                  style={{ background: 'var(--color-primary)' }}
+                >
+                  {sub.myEntryCount}회
+                </span>
+              )}
+            </div>
+
+            {sub.oneLineDesc && (
+              <p className="mt-1.5 text-xs text-[var(--color-text-secondary)] line-clamp-2 leading-relaxed">
+                {sub.oneLineDesc}
+              </p>
+            )}
+
+            <div className="mt-2 pb-2">
+              <span className="text-xs text-[var(--color-primary)] font-medium">자세히 보기 →</span>
+            </div>
+          </div>
+
+          {/* 하단 버튼 */}
+          <div
+            className="mx-3 mb-3 h-11 rounded-full flex items-center px-4 gap-2"
+            style={{ background: 'var(--color-primary)' }}
+          >
+            <span className="flex-1 text-left text-xs font-bold text-white">내 청약 설정중</span>
+            <div className="flex items-center justify-center h-6 px-2.5 bg-white/20 rounded-full">
+              <span className="text-[11px] font-bold text-white">{missionCount}/10</span>
             </div>
           </div>
         </div>
@@ -77,29 +126,24 @@ export default function SubscriptionCard({
 
   return (
     <div className="rounded-2xl overflow-hidden shadow-sm border border-[var(--color-border)] bg-white">
-      {/* 이미지 */}
       <div className="relative h-[200px] bg-gray-200">
-        {sub.imageUrl ? (
-          <img src={sub.imageUrl} alt={sub.title} className="w-full h-full object-cover" />
+        {imageUrl ? (
+          <img src={imageUrl} alt={sub.title} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400" />
         )}
         {hasProgress && (
           <>
-            <div
-              className="absolute top-3 left-3 w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold shadow"
-              style={{ background: progressColor(progress) }}
-            >
-              {progress}%
+            <div className="absolute top-3 left-3">
+              <ProgressCircle pct={Math.round(progress)} />
             </div>
             <div className="absolute top-3 right-3 bg-black/60 text-white text-[10px] px-2.5 py-1 rounded-full">
-              목표까지 {progress}% 달성
+              마감까지 {Math.round(progress)}% 달성
             </div>
           </>
         )}
       </div>
 
-      {/* 카드 본문 */}
       <div className="p-4">
         <span className="text-xs text-[var(--color-primary)] font-semibold">
           {TYPE_LABEL[sub.type]}
@@ -114,7 +158,6 @@ export default function SubscriptionCard({
           </p>
         )}
 
-        {/* 응모 현황 */}
         {hasProgress && (
           <div className="mt-2 flex items-center gap-1.5 text-sm text-[var(--color-text-secondary)]">
             <span>응모현황</span>
@@ -136,15 +179,11 @@ export default function SubscriptionCard({
           </span>
         </div>
 
-        {/* 하단 버튼 */}
         <div className="mt-3 pt-3 border-t border-[var(--color-border)] flex items-center justify-between">
           <Link
             href={`/subscriptions/${sub.id}`}
             className="flex-1 mr-3 h-10 rounded-full font-semibold text-sm flex items-center justify-center"
-            style={{
-              background: 'var(--color-surface)',
-              color: 'var(--color-text-secondary)',
-            }}
+            style={{ background: 'var(--color-surface)', color: 'var(--color-text-secondary)' }}
           >
             내 청약 설정중
           </Link>
