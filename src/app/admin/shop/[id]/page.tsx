@@ -190,9 +190,9 @@ export default function AdminShopDetailPage() {
         <hr className="border-gray-100" />
 
         {/* 판매기간 + 가격 + 활성화 상태 */}
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-4 gap-6">
           {/* 판매기간 */}
-          <div>
+          <div className="col-span-2">
             <label className="block text-sm font-semibold text-gray-700 mb-2">판매기간</label>
             <div className="flex items-center gap-1.5">
               <input
