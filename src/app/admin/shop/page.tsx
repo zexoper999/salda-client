@@ -170,13 +170,21 @@ export default function AdminShopPage() {
           ))}
         </div>
 
-        <button
-          disabled
-          title="외부 API 연동 후 사용 가능합니다"
-          className="px-5 py-2.5 bg-[#1C2536] text-white text-sm font-semibold rounded-lg opacity-40 cursor-not-allowed"
-        >
-          상품호출
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => router.push('/admin/shop/new')}
+            className="px-5 py-2.5 border border-[#1C2536] text-[#1C2536] text-sm font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            상품등록
+          </button>
+          <button
+            disabled
+            title="외부 API 연동 후 사용 가능합니다"
+            className="px-5 py-2.5 bg-[#1C2536] text-white text-sm font-semibold rounded-lg opacity-40 cursor-not-allowed"
+          >
+            상품호출
+          </button>
+        </div>
       </div>
     </div>
   );
