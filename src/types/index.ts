@@ -69,7 +69,7 @@ export interface Mission {
   title: string;
   oneLineDesc?: string;
   description?: string;
-  imageUrl?: string;
+  imageUrls: string[];
   publisher?: string;
   missionUrl?: string;
   rewardPoint: number;
