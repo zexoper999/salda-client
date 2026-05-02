@@ -97,6 +97,7 @@ export function useAdminMission(
       return r.data;
     },
     enabled: !!id,
+    staleTime: 0,
   });
 }
 
