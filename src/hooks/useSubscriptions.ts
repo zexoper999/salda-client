@@ -19,7 +19,6 @@ export function useSubscriptionDetail(id: number) {
       const res = await api.get(`/subscriptions/${id}`);
       return res.data;
     },
-    refetchInterval: 8000, // 8초마다 점유율 갱신 (polling)
   });
 }
 
