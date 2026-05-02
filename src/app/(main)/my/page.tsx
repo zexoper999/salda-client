@@ -34,44 +34,53 @@ export default function MyPage() {
 
       {/* 프로필 카드 */}
       <div className="mx-4 mt-4 bg-white rounded-2xl p-5">
-        <div className="flex items-center gap-4">
-          {/* 아바타 */}
-          <div className="w-16 h-16 rounded-full bg-[var(--color-surface)] flex items-center justify-center">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <circle cx="16" cy="12" r="6" fill="#9CA3AF" />
-              <path
-                d="M4 26C4 20.48 9.37 16 16 16C22.63 16 28 20.48 28 26"
-                stroke="#9CA3AF"
-                strokeWidth="2"
-                strokeLinecap="round"
-              />
-            </svg>
-          </div>
-          <div className="flex-1">
-            <p className="text-base font-bold text-[var(--color-text-primary)]">
-              {user?.name ?? '—'}{' '}
-              <span className="text-sm font-normal text-[var(--color-text-secondary)]">님</span>
+        {user ? (
+          <>
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-[var(--color-surface)] flex items-center justify-center">
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                  <circle cx="16" cy="12" r="6" fill="#9CA3AF" />
+                  <path d="M4 26C4 20.48 9.37 16 16 16C22.63 16 28 20.48 28 26" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-base font-bold text-[var(--color-text-primary)]">
+                  {user.name}{' '}
+                  <span className="text-sm font-normal text-[var(--color-text-secondary)]">님</span>
+                </p>
+                <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">포인트</p>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-lg font-black text-[var(--color-text-primary)]">
+                  {(user.point ?? 0).toLocaleString()}
+                </span>
+                <PointBadge />
+              </div>
+            </div>
+            <div className="mt-4 pt-4 border-t border-[var(--color-border)] flex items-center justify-between">
+              <span className="text-sm text-[var(--color-text-secondary)]">보유 응모권</span>
+              <div className="flex items-center gap-1.5">
+                <span className="text-base font-bold text-[var(--color-primary)]">{user.ticket ?? 0}장</span>
+                <span className="text-[var(--color-primary)] text-sm">◆</span>
+              </div>
+            </div>
+          </>
+        ) : (
+          <button
+            onClick={() => router.push('/login')}
+            className="w-full flex items-center gap-4"
+          >
+            <div className="w-16 h-16 rounded-full bg-[var(--color-surface)] flex items-center justify-center">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <circle cx="16" cy="12" r="6" fill="#D1D5DB" />
+                <path d="M4 26C4 20.48 9.37 16 16 16C22.63 16 28 20.48 28 26" stroke="#D1D5DB" strokeWidth="2" strokeLinecap="round" />
+              </svg>
+            </div>
+            <p className="text-sm text-[var(--color-text-secondary)]">
+              로그인하고 다양한 혜택을 받아보세요
             </p>
-            <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">포인트</p>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="text-lg font-black text-[var(--color-text-primary)]">
-              {(user?.point ?? 0).toLocaleString()}
-            </span>
-            <PointBadge />
-          </div>
-        </div>
-
-        {/* 응모권 */}
-        <div className="mt-4 pt-4 border-t border-[var(--color-border)] flex items-center justify-between">
-          <span className="text-sm text-[var(--color-text-secondary)]">보유 응모권</span>
-          <div className="flex items-center gap-1.5">
-            <span className="text-base font-bold text-[var(--color-primary)]">
-              {user?.ticket ?? 0}장
-            </span>
-            <span className="text-[var(--color-primary)] text-sm">◆</span>
-          </div>
-        </div>
+          </button>
+        )}
       </div>
 
       {/* 4개 아이콘 메뉴 */}
@@ -123,12 +132,14 @@ export default function MyPage() {
           <span className="text-sm text-[var(--color-text-secondary)]">앱버전</span>
           <span className="text-sm text-[var(--color-text-secondary)]">v 0.01</span>
         </div>
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center justify-between px-5 h-12 border-t border-[var(--color-border)]"
-        >
-          <span className="text-sm text-red-500 font-medium">로그아웃</span>
-        </button>
+        {user && (
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-between px-5 h-12 border-t border-[var(--color-border)]"
+          >
+            <span className="text-sm text-red-500 font-medium">로그아웃</span>
+          </button>
+        )}
       </div>
 
       {/* 사업자 정보 */}
