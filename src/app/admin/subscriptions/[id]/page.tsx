@@ -20,8 +20,6 @@ function fmtDateInput(iso: string) {
   return iso ? new Date(iso).toISOString().split('T')[0] : '';
 }
 
-type Status = 'ONGOING' | 'CLOSING_SOON' | 'CLOSED';
-
 export default function AdminSubscriptionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const subId = Number(id);
@@ -33,20 +31,16 @@ export default function AdminSubscriptionDetailPage() {
   const deleteMutation = useDeleteSubscription();
 
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [status, setStatus] = useState<Status>('ONGOING');
   const [saved, setSaved] = useState(false);
 
   const sub = data?.data;
 
   useEffect(() => {
-    if (sub) {
-      setImageUrls(sub.imageUrls);
-      setStatus(sub.status);
-    }
+    if (sub) setImageUrls(sub.imageUrls);
   }, [sub]);
 
   const handleSave = async () => {
-    await updateMutation.mutateAsync({ imageUrls, status });
+    await updateMutation.mutateAsync({ imageUrls });
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
@@ -136,23 +130,15 @@ export default function AdminSubscriptionDetailPage() {
             <p className="text-xl font-bold text-gray-800">{sub.entryCount.toLocaleString()}</p>
           </div>
           <div>
-            <p className="text-sm font-semibold text-gray-700 mb-3">상태변경</p>
-            <div className="flex items-center gap-4">
-              {(['ONGOING', 'CLOSING_SOON', 'CLOSED'] as Status[]).map((s) => (
-                <label key={s} className="flex items-center gap-1.5 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="status"
-                    value={s}
-                    checked={status === s}
-                    onChange={() => setStatus(s)}
-                    disabled={sub.status === 'CLOSED'}
-                    className="w-4 h-4 accent-gray-800"
-                  />
-                  <span className="text-sm text-gray-700">{STATUS_LABEL[s]}</span>
-                </label>
-              ))}
-            </div>
+            <p className="text-xs text-gray-400 mb-1">현재 상태</p>
+            <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full ${
+              sub.status === 'ACTIVE' || sub.status === 'ONGOING' ? 'bg-blue-100 text-blue-700' :
+              sub.status === 'CLOSING_SOON' ? 'bg-orange-100 text-orange-700' :
+              'bg-gray-100 text-gray-500'
+            }`}>
+              {STATUS_LABEL[sub.status] ?? sub.status}
+            </span>
+            <p className="text-[11px] text-gray-400 mt-1">마감은 아래 '청약마감' 버튼으로만 처리</p>
           </div>
         </div>
       </div>
