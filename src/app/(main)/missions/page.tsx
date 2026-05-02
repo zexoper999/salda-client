@@ -51,8 +51,8 @@ export default function MissionsPage() {
             {firstComeMissions.map((m) => (
               <Link key={m.id} href={`/missions/${m.id}`} className="flex-shrink-0 w-[100px]">
                 <div className="h-[100px] bg-[var(--color-surface)] rounded-xl overflow-hidden mb-2">
-                  {m.imageUrl ? (
-                    <img src={m.imageUrl} alt={m.title} className="w-full h-full object-cover" />
+                  {m.imageUrls?.[0] ? (
+                    <img src={m.imageUrls[0]} alt={m.title} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-blue-100 to-blue-200" />
                   )}
@@ -82,8 +82,8 @@ export default function MissionsPage() {
                 <div className="flex items-center gap-3 py-3.5 border-b border-[var(--color-border)]">
                   {/* 썸네일 */}
                   <div className="w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 bg-[var(--color-surface)]">
-                    {m.imageUrl ? (
-                      <img src={m.imageUrl} alt={m.title} className="w-full h-full object-cover" />
+                    {m.imageUrls?.[0] ? (
+                      <img src={m.imageUrls[0]} alt={m.title} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200" />
                     )}

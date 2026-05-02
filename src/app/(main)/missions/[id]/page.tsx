@@ -66,8 +66,8 @@ export default function MissionDetailPage() {
 
       {/* 이미지 */}
       <div className="relative h-[180px] bg-gray-100">
-        {mission.imageUrl ? (
-          <img src={mission.imageUrl} alt={mission.title} className="w-full h-full object-cover" />
+        {mission.imageUrls?.[0] ? (
+          <img src={mission.imageUrls[0]} alt={mission.title} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-blue-100 to-indigo-200" />
         )}
