@@ -1,7 +1,6 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import PageHeader from '@/components/layout/PageHeader';
 import { useAuthStore } from '@/store/useAuthStore';
 import { api } from '@/lib/axios';
 import { useQueryClient } from '@tanstack/react-query';
@@ -25,8 +24,6 @@ export default function MyPage() {
 
   return (
     <div className="min-h-dvh bg-[var(--color-surface)]">
-      <PageHeader showBack={false} />
-
       <div className="px-5 pt-5 pb-4 bg-white">
         <h1 className="text-2xl font-bold text-[var(--color-text-primary)]">
           보다 자세하게

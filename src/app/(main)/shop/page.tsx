@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import PageHeader from '@/components/layout/PageHeader';
 import { useProducts } from '@/hooks/useShop';
 import { useAuthStore } from '@/store/useAuthStore';
 import type { ProductCategory } from '@/types';
@@ -38,8 +37,6 @@ export default function ShopPage() {
 
   return (
     <div className="min-h-dvh bg-white">
-      <PageHeader showBack={false} />
-
       <div className="px-5 pt-5 pb-4">
         <h1 className="text-2xl font-bold text-[var(--color-text-primary)] leading-snug">
           포인트로 시작하는

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import PageHeader from '@/components/layout/PageHeader';
 import SubscriptionCard from '@/components/subscription/SubscriptionCard';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -27,8 +26,6 @@ export default function SubscriptionsPage() {
 
   return (
     <div className="min-h-dvh bg-white">
-      <PageHeader showBack={false} />
-
       <div className="px-5 pt-5 pb-4">
         <h1 className="text-2xl font-bold text-[var(--color-text-primary)] leading-snug">
           내 꿈을 이뤄줄<br />

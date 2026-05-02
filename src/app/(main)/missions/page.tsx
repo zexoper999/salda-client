@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import PageHeader from '@/components/layout/PageHeader';
 import { useMissions, useFirstComeMissions } from '@/hooks/useMissions';
 
 const CATEGORY_LABEL: Record<string, string> = {
@@ -26,8 +25,6 @@ export default function MissionsPage() {
 
   return (
     <div className="min-h-dvh bg-white">
-      <PageHeader showBack={false} />
-
       <div className="px-5 pt-5 pb-4">
         <h1 className="text-2xl font-bold text-[var(--color-text-primary)] leading-snug">
           생활에 혜택을 더하는
