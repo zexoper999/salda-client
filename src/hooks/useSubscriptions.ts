@@ -32,16 +32,15 @@ export function useMyEntries() {
   });
 }
 
-export function useEnterSubscription(subscriptionId: number) {
+export function useSetSubscription() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (ticketCount: number) => {
-      const res = await api.post(`/subscriptions/${subscriptionId}/enter`, { ticketCount });
+    mutationFn: async (subscriptionId: number) => {
+      const res = await api.post(`/subscriptions/${subscriptionId}/set`);
       return res.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['subscriptions', subscriptionId] });
-      queryClient.invalidateQueries({ queryKey: ['auth-me'] }); // 응모권 잔액 갱신
+      queryClient.invalidateQueries({ queryKey: ['subscriptions'] });
     },
   });
 }

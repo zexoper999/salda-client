@@ -11,8 +11,14 @@ export interface User {
   name: string;
   phone: string | null;
   point: number;
-  ticket: number;
   role: 'USER' | 'ADMIN';
+}
+
+export interface SubscriptionProgress {
+  missionCount: number;   // 이 청약에서 완료한 미션 수
+  totalPieces: number;    // 누적 조각 수
+  currentPieces: number;  // 현재 조각 수 = totalPieces % 10 (UI: N/10)
+  totalTickets: number;   // 응모횟수 = floor(totalPieces/10) (UI: "11회")
 }
 
 // ─── 청약 ─────────────────────────────────────────────────────
@@ -31,7 +37,9 @@ export interface Subscription {
   maxEntries: number;         // 목표 응모수 (0이면 미설정)
   totalEntryCount: number;    // 현재 전체 응모 건수
   entryProgress: number;      // 응모달성률 = totalEntryCount / maxEntries * 100
-  myEntryCount?: number;      // 내 응모 횟수
+  myEntryCount?: number;
+  isMySubscription?: boolean;
+  myProgress?: SubscriptionProgress;
   bonusIncluded: boolean;
   startAt: string;
   endAt: string;
@@ -40,14 +48,14 @@ export interface Subscription {
 
 export interface SubscriptionListResponse {
   subscriptions: Subscription[];
-  missionCount: number;       // 사용자 미션진행도 (0~9, 10이 되면 자동응모)
 }
 
 export interface SubscriptionDetail extends Subscription {
   totalTickets: number;
   myTickets: number;
-  myEntryRate: number;        // 내 참여율 = myTickets / totalTickets * 100
-  myEntryCount: number;       // 내 응모 횟수
+  myEntryRate: number;
+  isMySubscription: boolean;
+  myProgress: SubscriptionProgress;
 }
 
 export interface SubscriptionEntry {

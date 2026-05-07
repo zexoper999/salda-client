@@ -14,6 +14,7 @@ export interface AdminSubscription {
   entryCount: number;
   entryCountFmt: string;
   status: 'ONGOING' | 'CLOSING_SOON' | 'CLOSED';
+  isDefault: boolean;
 }
 
 export interface AdminSubscriptionDetail extends AdminSubscription {
@@ -93,6 +94,17 @@ export function useDeleteSubscription() {
   return useMutation({
     mutationFn: async (id: number) => {
       const r = await api.delete(`/admin/subscriptions/${id}`);
+      return r.data;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-subscriptions'] }),
+  });
+}
+
+export function useSetDefaultSubscription() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: number) => {
+      const r = await api.patch(`/admin/subscriptions/${id}/set-default`);
       return r.data;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin-subscriptions'] }),
