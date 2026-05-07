@@ -46,6 +46,15 @@ body {
   font-family: var(--font-sans);
 }
 
+/* ─── 스크롤바 숨김 ──────────────────────────────────────────── */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* ─── 모바일 앱 컨테이너 ─────────────────────────────────────── */
 /* 모든 페이지는 최대 430px, 화면 중앙 정렬 */
 #app-container {

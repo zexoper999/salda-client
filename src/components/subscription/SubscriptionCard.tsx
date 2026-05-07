@@ -78,7 +78,7 @@ function CompactCard({ sub, images, progress, hasProgress, isMine, currentPieces
   };
 
   return (
-    <Link href={`/subscriptions/${sub.id}`} className="block w-[300px] flex-shrink-0">
+    <Link href={`/subscriptions/${sub.id}`} className="block w-full">
       <div className="rounded-3xl overflow-hidden shadow-md bg-white">
         {/* 이미지 캐러셀 */}
         <div className="relative h-[170px] bg-gray-200 overflow-hidden">

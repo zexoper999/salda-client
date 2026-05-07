@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/useAuthStore';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
 import { useProducts } from '@/hooks/useShop';
-import SubscriptionCard from '@/components/subscription/SubscriptionCard';
+import SubscriptionCarousel from '@/components/subscription/SubscriptionCarousel';
 import { api } from '@/lib/axios';
 import type { Banner } from '@/hooks/useAdminBanners';
 
@@ -85,15 +85,7 @@ export default function HomePage() {
             </div>
           </div>
         ) : (
-          <div className="flex gap-3 px-5 overflow-x-auto scrollbar-hide pb-1">
-            {subscriptions.map((sub) => (
-              <SubscriptionCard
-                key={sub.id}
-                subscription={sub}
-                compact
-              />
-            ))}
-          </div>
+          <SubscriptionCarousel subscriptions={subscriptions} />
         )}
       </section>
 
