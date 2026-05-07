@@ -2,29 +2,22 @@
 
 import { useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import BottomSheet from '@/components/ui/BottomSheet';
-import { useSubscriptionDetail, useSubscriptions, useEnterSubscription } from '@/hooks/useSubscriptions';
-import { useAuthStore } from '@/store/useAuthStore';
+import { useSubscriptionDetail, useSetSubscription } from '@/hooks/useSubscriptions';
 import { useToastStore } from '@/store/useToastStore';
 
 export default function SubscriptionDetailPage() {
   const { id } = useParams<{ id: string }>();
   const subscriptionId = Number(id);
   const router = useRouter();
-  const { user } = useAuthStore();
   const { show } = useToastStore();
 
   const { data, isLoading } = useSubscriptionDetail(subscriptionId);
-  const { data: listData } = useSubscriptions();
-  const enterMutation = useEnterSubscription(subscriptionId);
+  const setMutation = useSetSubscription();
 
-  const [ticketInput, setTicketInput] = useState(1);
-  const [showEntrySheet, setShowEntrySheet] = useState(false);
   const [currentImage, setCurrentImage] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const sub = data?.data;
-  const missionCount = listData?.data?.missionCount ?? 0;
 
   if (isLoading || !sub) {
     return (
@@ -39,7 +32,9 @@ export default function SubscriptionDetailPage() {
   }
 
   const isClosed = sub.status === 'CLOSED';
+  const isMine = sub.isMySubscription;
   const images = sub.imageUrls?.length ? sub.imageUrls : [];
+  const currentPieces = sub.myProgress?.currentPieces ?? 0;
 
   const handleScroll = () => {
     if (!scrollRef.current) return;
@@ -47,21 +42,19 @@ export default function SubscriptionDetailPage() {
     setCurrentImage(idx);
   };
 
-  const handleEnter = async () => {
-    if (ticketInput < 1 || ticketInput > (user?.ticket ?? 0)) return;
+  const handleSetSubscription = async () => {
     try {
-      await enterMutation.mutateAsync(ticketInput);
-      setShowEntrySheet(false);
-      show('success', `응모 완료! 응모권 ${ticketInput}장을 사용했습니다.`);
+      await setMutation.mutateAsync(subscriptionId);
+      show('success', '청약이 설정되었습니다.');
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
-      show('error', msg ?? '응모 중 오류가 발생했습니다.');
+      show('error', msg ?? '청약 설정 중 오류가 발생했습니다.');
     }
   };
 
   return (
     <div className="min-h-dvh bg-white">
-      {/* 이미지 캐러셀 — 상단 fullbleed */}
+      {/* 이미지 캐러셀 */}
       <div className="relative h-[320px] bg-gray-200 overflow-hidden">
         {images.length > 0 ? (
           <div
@@ -80,7 +73,7 @@ export default function SubscriptionDetailPage() {
           <div className="w-full h-full bg-gradient-to-br from-blue-200 to-blue-400" />
         )}
 
-        {/* 뒤로가기 버튼 */}
+        {/* 뒤로가기 */}
         <button
           onClick={() => router.back()}
           className="absolute top-12 left-4 w-9 h-9 rounded-full bg-black/40 flex items-center justify-center"
@@ -145,18 +138,32 @@ export default function SubscriptionDetailPage() {
             />
           </div>
           <div className="flex justify-between text-xs text-[var(--color-text-secondary)]">
-            <span>내 응모권: {sub.myTickets}장</span>
-            <span>전체 응모권: {sub.totalTickets.toLocaleString()}장</span>
+            <span>내 응모권: {sub.myTickets}개</span>
+            <span>전체 응모권: {sub.totalTickets.toLocaleString()}개</span>
           </div>
         </div>
 
-        {/* 응모 횟수 안내 */}
-        {sub.myEntryCount > 0 && (
-          <p className="text-sm text-[var(--color-text-secondary)]">
-            지금까지 이 청약을{' '}
-            <strong className="text-[var(--color-primary)]">{sub.myEntryCount}회</strong>{' '}
-            응모하셨어요.
-          </p>
+        {/* 내 미션 진행 현황 */}
+        {isMine && (
+          <div className="bg-[var(--color-surface)] rounded-2xl p-4 space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-[var(--color-text-secondary)]">조각 진행 (내 청약)</span>
+              <span className="font-bold text-[var(--color-text-primary)]">
+                {currentPieces}
+                <span className="text-[var(--color-text-secondary)] font-normal">/10</span>
+              </span>
+            </div>
+            <div className="w-full h-2.5 bg-white rounded-full overflow-hidden border border-[var(--color-border)]">
+              <div
+                className="h-full rounded-full transition-all duration-500"
+                style={{ width: `${(currentPieces / 10) * 100}%`, background: 'var(--color-primary)' }}
+              />
+            </div>
+            <p className="text-xs text-[var(--color-text-secondary)]">
+              미션 <strong className="text-[var(--color-text-primary)]">{sub.myProgress?.missionCount ?? 0}회</strong> 완료 ·
+              누적 응모권 <strong className="text-[var(--color-text-primary)]">{sub.myProgress?.totalTickets ?? 0}개</strong>
+            </p>
+          </div>
         )}
 
         {/* 청약 정보 */}
@@ -175,70 +182,39 @@ export default function SubscriptionDetailPage() {
         )}
       </div>
 
-      {/* 플로팅 응모 버튼 */}
-      {!isClosed && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-40px)] max-w-[390px] z-40">
+      {/* 플로팅 버튼 */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-40px)] max-w-[390px] z-40">
+        {isClosed ? (
           <button
-            onClick={() => setShowEntrySheet(true)}
-            className="w-full h-14 rounded-full flex items-center px-5 gap-3 shadow-lg"
+            disabled
+            className="w-full h-14 rounded-full flex items-center justify-center bg-gray-200"
+          >
+            <span className="text-sm font-bold text-gray-500">청약마감 · 당첨자 추첨중</span>
+          </button>
+        ) : isMine ? (
+          <button
+            disabled
+            className="w-full h-14 rounded-full flex items-center px-5 gap-3 shadow-lg opacity-100"
             style={{ background: 'var(--color-primary)' }}
           >
             <span className="flex-1 text-left text-sm font-bold text-white">내 청약 설정중</span>
             <div className="flex items-center justify-center h-7 px-3 bg-white/20 rounded-full">
-              <span className="text-xs font-bold text-white">{missionCount}/10</span>
+              <span className="text-xs font-bold text-white">{currentPieces}/10</span>
             </div>
           </button>
-        </div>
-      )}
-
-      {/* 응모 바텀시트 */}
-      <BottomSheet isOpen={showEntrySheet} onClose={() => setShowEntrySheet(false)} title="응모권 사용">
-        <div className="space-y-5">
-          <p className="text-sm text-[var(--color-text-secondary)]">
-            보유 응모권: <strong className="text-[var(--color-text-primary)]">{user?.ticket ?? 0}장</strong>
-          </p>
-
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setTicketInput((v) => Math.max(1, v - 1))}
-              className="w-11 h-11 rounded-full border border-[var(--color-border)] text-xl font-bold flex items-center justify-center flex-shrink-0"
-            >
-              −
-            </button>
-            <input
-              type="number"
-              min={1}
-              max={user?.ticket ?? 1}
-              value={ticketInput}
-              onChange={(e) => setTicketInput(Number(e.target.value))}
-              className="flex-1 h-11 text-center text-lg font-bold border border-[var(--color-border)] rounded-xl"
-            />
-            <button
-              onClick={() => setTicketInput((v) => Math.min(user?.ticket ?? 1, v + 1))}
-              className="w-11 h-11 rounded-full border border-[var(--color-border)] text-xl font-bold flex items-center justify-center flex-shrink-0"
-            >
-              ＋
-            </button>
-          </div>
-
-          <div className="flex gap-3 pt-1">
-            <button
-              onClick={() => setShowEntrySheet(false)}
-              className="flex-1 h-12 rounded-full border border-[var(--color-border)] text-sm font-medium"
-            >
-              취소
-            </button>
-            <button
-              onClick={handleEnter}
-              disabled={enterMutation.isPending || ticketInput < 1 || ticketInput > (user?.ticket ?? 0)}
-              className="flex-1 h-12 rounded-full text-white font-bold text-sm disabled:opacity-50"
-              style={{ background: 'var(--color-primary)' }}
-            >
-              {enterMutation.isPending ? '처리 중...' : `${ticketInput}장으로 응모`}
-            </button>
-          </div>
-        </div>
-      </BottomSheet>
+        ) : (
+          <button
+            onClick={handleSetSubscription}
+            disabled={setMutation.isPending}
+            className="w-full h-14 rounded-full flex items-center justify-center shadow-lg disabled:opacity-50"
+            style={{ background: 'var(--color-primary)' }}
+          >
+            <span className="text-sm font-bold text-white">
+              {setMutation.isPending ? '설정 중...' : '이 청약 설정하기'}
+            </span>
+          </button>
+        )}
+      </div>
     </div>
   );
 }

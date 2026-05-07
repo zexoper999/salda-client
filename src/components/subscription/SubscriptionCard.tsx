@@ -3,7 +3,6 @@ import type { Subscription } from '@/types';
 
 interface SubscriptionCardProps {
   subscription: Subscription;
-  missionCount?: number;
   compact?: boolean;
 }
 
@@ -42,20 +41,18 @@ function ProgressCircle({ pct }: { pct: number }) {
   );
 }
 
-export default function SubscriptionCard({
-  subscription: sub,
-  missionCount = 0,
-  compact = false,
-}: SubscriptionCardProps) {
+export default function SubscriptionCard({ subscription: sub, compact = false }: SubscriptionCardProps) {
   const imageUrl = sub.imageUrls?.[0];
   const progress = sub.entryProgress;
   const hasProgress = sub.maxEntries > 0;
+  const isMine = sub.isMySubscription ?? false;
+  const currentPieces = sub.myProgress?.currentPieces ?? 0;
+  const totalTickets = sub.myProgress?.totalTickets ?? 0;
 
   if (compact) {
     return (
       <Link href={`/subscriptions/${sub.id}`} className="block w-[300px] flex-shrink-0">
         <div className="rounded-3xl overflow-hidden shadow-md bg-white">
-          {/* 이미지 영역 */}
           <div className="relative h-[170px] bg-gray-200">
             {imageUrl ? (
               <img src={imageUrl} alt={sub.title} className="w-full h-full object-cover" />
@@ -74,7 +71,6 @@ export default function SubscriptionCard({
             )}
           </div>
 
-          {/* 컨텐츠 */}
           <div className="px-4 pt-3 pb-2">
             <span className="text-[11px] text-[var(--color-primary)] font-semibold">
               {TYPE_LABEL[sub.type]}
@@ -88,12 +84,12 @@ export default function SubscriptionCard({
               <span className="text-xs font-semibold text-[var(--color-text-primary)]">
                 {(sub as { myEntryRate?: number }).myEntryRate?.toFixed(4) ?? '0.0000'}%
               </span>
-              {(sub.myEntryCount ?? 0) > 0 && (
+              {totalTickets > 0 && (
                 <span
                   className="text-[10px] font-bold text-white px-1.5 py-0.5 rounded-full"
                   style={{ background: 'var(--color-primary)' }}
                 >
-                  {sub.myEntryCount}회
+                  {totalTickets}회
                 </span>
               )}
             </div>
@@ -109,16 +105,17 @@ export default function SubscriptionCard({
             </div>
           </div>
 
-          {/* 하단 버튼 */}
-          <div
-            className="mx-3 mb-3 h-11 rounded-full flex items-center px-4 gap-2"
-            style={{ background: 'var(--color-primary)' }}
-          >
-            <span className="flex-1 text-left text-xs font-bold text-white">내 청약 설정중</span>
-            <div className="flex items-center justify-center h-6 px-2.5 bg-white/20 rounded-full">
-              <span className="text-[11px] font-bold text-white">{missionCount}/10</span>
+          {isMine && (
+            <div
+              className="mx-3 mb-3 h-11 rounded-full flex items-center px-4 gap-2"
+              style={{ background: 'var(--color-primary)' }}
+            >
+              <span className="flex-1 text-left text-xs font-bold text-white">내 청약 설정중</span>
+              <div className="flex items-center justify-center h-6 px-2.5 bg-white/20 rounded-full">
+                <span className="text-[11px] font-bold text-white">{currentPieces}/10</span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </Link>
     );
@@ -168,10 +165,7 @@ export default function SubscriptionCard({
         )}
 
         <div className="mt-3 flex items-center justify-between">
-          <Link
-            href={`/subscriptions/${sub.id}`}
-            className="text-sm text-[var(--color-primary)] font-medium"
-          >
+          <Link href={`/subscriptions/${sub.id}`} className="text-sm text-[var(--color-primary)] font-medium">
             자세히 보기
           </Link>
           <span className="text-xs text-[var(--color-text-secondary)]">
@@ -179,18 +173,19 @@ export default function SubscriptionCard({
           </span>
         </div>
 
-        <div className="mt-3 pt-3 border-t border-[var(--color-border)] flex items-center justify-between">
-          <Link
-            href={`/subscriptions/${sub.id}`}
-            className="flex-1 mr-3 h-10 rounded-full font-semibold text-sm flex items-center justify-center"
-            style={{ background: 'var(--color-surface)', color: 'var(--color-text-secondary)' }}
-          >
-            내 청약 설정중
-          </Link>
-          <span className="text-sm font-semibold text-[var(--color-text-secondary)] whitespace-nowrap">
-            {missionCount}/10
-          </span>
-        </div>
+        {isMine && (
+          <div className="mt-3 pt-3 border-t border-[var(--color-border)] flex items-center justify-between">
+            <span
+              className="flex-1 mr-3 h-10 rounded-full font-semibold text-sm flex items-center justify-center"
+              style={{ background: 'var(--color-surface)', color: 'var(--color-primary)' }}
+            >
+              내 청약 설정중
+            </span>
+            <span className="text-sm font-semibold text-[var(--color-text-secondary)] whitespace-nowrap">
+              {currentPieces}/10
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

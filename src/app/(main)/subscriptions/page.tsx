@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import SubscriptionCard from '@/components/subscription/SubscriptionCard';
 import { useSubscriptions } from '@/hooks/useSubscriptions';
-import { useAuthStore } from '@/store/useAuthStore';
 import type { SubscriptionType } from '@/types';
 
 type TabType = SubscriptionType | 'ALL';
@@ -16,13 +15,11 @@ const TABS: { key: TabType; label: string }[] = [
 
 export default function SubscriptionsPage() {
   const [activeTab, setActiveTab] = useState<TabType>('ALL');
-  const { user } = useAuthStore();
 
   const { data, isLoading } = useSubscriptions(
     activeTab === 'ALL' ? undefined : activeTab,
   );
   const subscriptions = data?.data?.subscriptions ?? [];
-  const missionCount = data?.data?.missionCount ?? 0;
 
   return (
     <div className="min-h-dvh bg-white">
@@ -33,36 +30,28 @@ export default function SubscriptionsPage() {
         </h1>
       </div>
 
-      {/* 탭 + 보유 응모권 */}
+      {/* 탭 */}
       <div className="sticky top-0 bg-white z-30 px-5 border-b border-[var(--color-border)]">
-        <div className="flex items-end justify-between">
-          <div className="flex gap-5">
-            {TABS.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`pb-3 text-sm font-semibold border-b-2 transition-colors ${
-                  activeTab === tab.key
-                    ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
-                    : 'border-transparent text-[var(--color-text-secondary)]'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-          <div className="pb-3 flex items-center gap-1.5">
-            <span className="text-sm font-bold text-[var(--color-text-primary)]">
-              {user?.ticket ?? 0}
-            </span>
-            <span className="text-sm text-[var(--color-primary)]">◆</span>
-          </div>
+        <div className="flex gap-5">
+          {TABS.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`pb-3 text-sm font-semibold border-b-2 transition-colors ${
+                activeTab === tab.key
+                  ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
+                  : 'border-transparent text-[var(--color-text-secondary)]'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* 진행중 응모 카운트 */}
+      {/* 진행중 청약 카운트 */}
       <div className="px-5 py-3 text-sm text-[var(--color-text-secondary)]">
-        진행중 응모{' '}
+        진행중 청약{' '}
         <span className="text-[var(--color-primary)] font-semibold">{subscriptions.length}개</span>
       </div>
 
@@ -73,11 +62,7 @@ export default function SubscriptionsPage() {
               <div key={i} className="h-[360px] bg-[var(--color-surface)] rounded-2xl animate-pulse" />
             ))
           : subscriptions.map((sub) => (
-              <SubscriptionCard
-                key={sub.id}
-                subscription={sub}
-                missionCount={missionCount}
-              />
+              <SubscriptionCard key={sub.id} subscription={sub} />
             ))}
         {!isLoading && subscriptions.length === 0 && (
           <div className="py-20 text-center text-[var(--color-text-secondary)] text-sm">
