@@ -23,8 +23,10 @@ export default function MissionDetailPage() {
 
   const [resultSheet, setResultSheet] = useState<{
     pointEarned: number;
-    ticketEarned: number;
-    bonusTicket: number;
+    piecesEarned: number;
+    currentPieces: number;
+    totalTickets: number;
+    newTicketsEarned: number;
   } | null>(null);
 
   const mission = data?.data;
@@ -51,8 +53,10 @@ export default function MissionDetailPage() {
       const d = res.data;
       setResultSheet({
         pointEarned: d.pointEarned,
-        ticketEarned: d.ticketEarned,
-        bonusTicket: d.bonusTicket,
+        piecesEarned: d.piecesEarned,
+        currentPieces: d.currentPieces,
+        totalTickets: d.totalTickets,
+        newTicketsEarned: d.newTicketsEarned,
       });
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
