@@ -38,6 +38,7 @@ export interface Subscription {
   totalEntryCount: number;    // 현재 전체 응모 건수
   entryProgress: number;      // 응모달성률 = totalEntryCount / maxEntries * 100
   myEntryCount?: number;
+  myEntryRate?: number;
   isMySubscription?: boolean;
   myProgress?: SubscriptionProgress;
   bonusIncluded: boolean;
