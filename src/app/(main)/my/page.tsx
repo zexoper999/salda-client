@@ -58,10 +58,9 @@ export default function MyPage() {
               </div>
             </div>
             <div className="mt-4 pt-4 border-t border-[var(--color-border)] flex items-center justify-between">
-              <span className="text-sm text-[var(--color-text-secondary)]">보유 응모권</span>
+              <span className="text-sm text-[var(--color-text-secondary)]">내 포인트</span>
               <div className="flex items-center gap-1.5">
-                <span className="text-base font-bold text-[var(--color-primary)]">{user.ticket ?? 0}장</span>
-                <span className="text-[var(--color-primary)] text-sm">◆</span>
+                <span className="text-base font-bold text-[var(--color-primary)]">{user.point.toLocaleString()}P</span>
               </div>
             </div>
           </>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAdminSubscriptions, STATUS_LABEL, type AdminSubscription } from '@/hooks/useAdminSubscriptions';
+import { useAdminSubscriptions, useSetDefaultSubscription, STATUS_LABEL, type AdminSubscription } from '@/hooks/useAdminSubscriptions';
 
 function fmtDate(iso: string) {
   const d = new Date(iso);
@@ -26,6 +26,7 @@ export default function AdminSubscriptionsPage() {
   const LIMIT = 10;
 
   const { data, isLoading } = useAdminSubscriptions(page, LIMIT, search);
+  const setDefaultMutation = useSetDefaultSubscription();
   const subs = data?.data?.subscriptions ?? [];
   const total = data?.data?.total ?? 0;
   const totalPages = Math.max(1, Math.ceil(total / LIMIT));
@@ -46,13 +47,14 @@ export default function AdminSubscriptionsPage() {
               <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 w-24">응모현황</th>
               <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 w-20">작성일</th>
               <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 w-24">상태</th>
+              <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 w-24">Default</th>
             </tr>
           </thead>
           <tbody>
             {isLoading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <tr key={i} className="border-b border-gray-100 animate-pulse">
-                  {Array.from({ length: 6 }).map((_, j) => (
+                  {Array.from({ length: 7 }).map((_, j) => (
                     <td key={j} className="px-4 py-5">
                       <div className="h-4 bg-gray-100 rounded" />
                     </td>
@@ -61,7 +63,7 @@ export default function AdminSubscriptionsPage() {
               ))
             ) : subs.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-12 text-center text-sm text-gray-400">
+                <td colSpan={7} className="px-4 py-12 text-center text-sm text-gray-400">
                   등록된 청약이 없습니다.
                 </td>
               </tr>
@@ -99,6 +101,21 @@ export default function AdminSubscriptionsPage() {
                   <td className="px-4 py-4 font-medium text-gray-700">{sub.entryCountFmt}</td>
                   <td className="px-4 py-4 text-gray-500">{fmtDate(sub.createdAt)}</td>
                   <td className="px-4 py-4"><StatusBadge status={sub.status} /></td>
+                  <td className="px-4 py-4" onClick={(e) => e.stopPropagation()}>
+                    {sub.isDefault ? (
+                      <span className="text-xs font-bold text-[#1C2536] px-2.5 py-1 bg-blue-100 rounded-full">
+                        Default
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => setDefaultMutation.mutate(sub.id)}
+                        disabled={setDefaultMutation.isPending || sub.status === 'CLOSED'}
+                        className="text-xs px-2.5 py-1 border border-gray-300 rounded-full text-gray-500 hover:border-[#1C2536] hover:text-[#1C2536] disabled:opacity-40 transition-colors"
+                      >
+                        지정
+                      </button>
+                    )}
+                  </td>
                 </tr>
               ))
             )}

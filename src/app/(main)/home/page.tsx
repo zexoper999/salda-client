@@ -21,7 +21,6 @@ export default function HomePage() {
   const activeBanner = bannerData?.data?.[0];
 
   const subscriptions = subData?.data?.subscriptions?.slice(0, 5) ?? [];
-  const missionCount = subData?.data?.missionCount ?? 0;
   const products = productData?.data?.products?.slice(0, 4) ?? [];
 
   return (
@@ -91,7 +90,6 @@ export default function HomePage() {
               <SubscriptionCard
                 key={sub.id}
                 subscription={sub}
-                missionCount={missionCount}
                 compact
               />
             ))}

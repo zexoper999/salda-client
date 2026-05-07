@@ -132,7 +132,7 @@ export default function AdminSubscriptionDetailPage() {
           <div>
             <p className="text-xs text-gray-400 mb-1">현재 상태</p>
             <span className={`inline-block text-xs font-semibold px-2.5 py-1 rounded-full ${
-              sub.status === 'ACTIVE' || sub.status === 'ONGOING' ? 'bg-blue-100 text-blue-700' :
+              sub.status === 'ONGOING' ? 'bg-blue-100 text-blue-700' :
               sub.status === 'CLOSING_SOON' ? 'bg-orange-100 text-orange-700' :
               'bg-gray-100 text-gray-500'
             }`}>
